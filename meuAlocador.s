@@ -18,6 +18,14 @@ iniciaAlocador:
 finalizaAlocador:
     pushq %rbp
     movq %rsp, %rbp
+    movq $12, %rax # código brk
+    movq $0, %rdi # tamanho 0 no argumento
+    syscall
+    movq topoInicialHeap, %rbx
+    subq %rax, %rbx # tamanho inicial - tamanho atual
+    movq %rbx, %rdi
+    movq $12, %rax
+    syscall
     popq %rbp
     ret
 
@@ -41,6 +49,7 @@ imprimeMapa:
 
 main:
     call iniciaAlocador
+    call finalizaAlocador
     movq $60, %rax
     movq %rbx, %rdi
     syscall
