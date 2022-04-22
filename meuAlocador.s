@@ -50,11 +50,11 @@ alocaMem:
         cmpq %r10, %r11 # compara iterador com topo
         je aumentaHeap # se igual, aumenta heap
         
+        movq 8(%r10), %r12
         cmpq $OCUPADO, (%r10) # verifica se bloco está ocupado
         je incrementaIterador
 
-        movq 8(%r10), %r12 # r12 <- tamanho alocado no bloco
-        cmpq %rdi, %r12 # compara tamanhos de memória
+        cmpq %r12, %rdi # compara tamanhos de memória
         jle armazena # armazena no bloco se o tamanho é menor ou igual
 
     incrementaIterador:
@@ -73,6 +73,7 @@ alocaMem:
     aumentaHeap:
         addq $8, %r11
         addq %rdi, %r11
+        movq %r11, topoAtualHeap
         pushq %r13
         movq %rdi, %r13
 
@@ -80,7 +81,6 @@ alocaMem:
         movq $12, %rax
         syscall
 
-        movq %r11, topoAtualHeap # atualiza topo
         movq $OCUPADO, (%r10) # indica que bloco está ocupado
         movq %r13, 8(%r10) # armazena tamanho do bloco
         movq %r10, %rax
@@ -111,15 +111,16 @@ main:
     movq %rsp, %rbp
     call iniciaAlocador
     subq $8, %rsp
-    movq $16, %rdi
+    movq $100, %rdi
     pushq %rdi
     call alocaMem
     popq %rdi
-    movq $9, 8(%rax)
+    movq $120, %rdi
+    pushq %rdi
+    call alocaMem
+    popq %rdi
+    addq $8, %rsp
     call imprimeMapa
-    movq %rax, %rdi
-    call liberaMem
-    call finalizaAlocador
     movq $60, %rax
     syscall
     
