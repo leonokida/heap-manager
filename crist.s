@@ -40,7 +40,7 @@ iniciaAlocador:
 alocaMem:
      pushq %rbp                                               
      movq %rsp, %rbp
-     movq %rdi, %rax
+     movq %rdi, %rax # num bytes
      movq INICIO_HEAP, %rbx
      movq TOPO_HEAP, %r10
 

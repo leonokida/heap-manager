@@ -1,5 +1,7 @@
 .section .data
+    strInicia: .string "Endereço inicial: %d\n"
     topoInicialHeap: .quad 0
+    topoAtualHeap: .quad 0
 
 .section .text
 
@@ -12,18 +14,17 @@ iniciaAlocador:
     movq $0, %rdi # tamanho 0 no argumento
     syscall
     movq %rax, topoInicialHeap
+    movq %rax, topoAtualHeap
+    movq $strInicia, %rdi
+    movq %rax, %rsi
+    call printf
     popq %rbp
     ret
 
 finalizaAlocador:
     pushq %rbp
     movq %rsp, %rbp
-    movq $12, %rax # código brk
-    movq $0, %rdi # tamanho 0 no argumento
-    syscall
-    movq topoInicialHeap, %rbx
-    subq %rax, %rbx # tamanho inicial - tamanho atual
-    movq %rbx, %rdi
+    movq topoInicialHeap, %rdi
     movq $12, %rax
     syscall
     popq %rbp
