@@ -1,6 +1,5 @@
 .section .data
     strInicia: .string "Endereço inicial: %d\n"
-    strBlocosAlocados: .string "%d\n"
     topoInicialHeap: .quad 0
     topoAtualHeap: .quad 0
     .equ OCUPADO, 0
@@ -8,7 +7,12 @@
 
 .section .text
 
-.globl iniciaAlocador, finalizaAlocador, alocaMem, liberaMem, imprimeMapa, main
+.globl iniciaAlocador
+.globl finalizaAlocador
+.globl alocaMem
+.globl liberaMem
+.globl imprimeMapa
+.globl main
 
 iniciaAlocador:
     pushq %rbp
@@ -28,7 +32,7 @@ finalizaAlocador:
     pushq %rbp
     movq %rsp, %rbp
     movq topoInicialHeap, %rdi # rdi <- rbk inicial
-    subq topoAtualHeap, %rdi # rdi <- rbk inicial - rbk final
+    movq %rdi, topoAtualHeap
     movq $12, %rax
     syscall
     popq %rbp
@@ -72,7 +76,7 @@ alocaMem:
         pushq %r13
         movq %rdi, %r13
 
-        addq $16, %rdi
+        movq %r11, %rdi
         movq $12, %rax
         syscall
 
@@ -91,6 +95,8 @@ alocaMem:
 liberaMem:
     pushq %rbp
     movq %rsp, %rbp
+    subq $16, %rdi
+    movq $LIVRE, (%rdi)
     popq %rbp
     ret
 
@@ -109,7 +115,10 @@ main:
     pushq %rdi
     call alocaMem
     popq %rdi
-    # call imprimeMapa
+    movq $9, 8(%rax)
+    call imprimeMapa
+    movq %rax, %rdi
+    call liberaMem
     call finalizaAlocador
     movq $60, %rax
     syscall
