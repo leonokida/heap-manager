@@ -115,7 +115,9 @@ main:
     pushq %rdi
     call alocaMem
     popq %rdi
-    movq $120, %rdi
+    movq %rax, %rdi
+    call liberaMem
+    movq $90, %rdi
     pushq %rdi
     call alocaMem
     popq %rdi
