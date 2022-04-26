@@ -1,5 +1,9 @@
 .section .data
     strInicia: .string "Endereço inicial: %d\n"
+    info: .string "################"
+    livre: .string "-"
+    ocupado: .string "+"
+    brline: .string "\n"
     topoInicialHeap: .quad 0
     topoAtualHeap: .quad 0
     .equ OCUPADO, 0
@@ -12,7 +16,7 @@
 .globl alocaMem
 .globl liberaMem
 .globl imprimeMapa
-.globl main
+# .globl main
 
 iniciaAlocador:
     pushq %rbp
@@ -103,26 +107,80 @@ liberaMem:
 imprimeMapa:
     pushq %rbp
     movq %rsp, %rbp
-    popq %rbp
-    ret
 
-main:
-    pushq %rbp
-    movq %rsp, %rbp
-    call iniciaAlocador
-    subq $8, %rsp
-    movq $100, %rdi
-    pushq %rdi
-    call alocaMem
-    popq %rdi
-    movq %rax, %rdi
-    call liberaMem
-    movq $90, %rdi
-    pushq %rdi
-    call alocaMem
-    popq %rdi
-    addq $8, %rsp
-    call imprimeMapa
-    movq $60, %rax
-    syscall
+    movq topoInicialHeap, %rbx
+    movq topoAtualHeap, %r10
+
+    laco:
+        cmpq %r10, %rbx
+        jge retorno
+        jl imprime
+
+    imprime:
+        movq $info, %rdi
+        call printf
+
+        jmp imprime_bloco
+    
+    imprime_bloco:
+        movq $1, %r13
+        movq 8(%rbx), %r12      # indica tamanho do bloco
+        cmpq $OCUPADO, (%rbx)   # verifica se o bloco esta ocupado
+        je bloco_ocupado
+        jmp bloco_disponivel
+    
+    bloco_ocupado:
+        cmpq %r12, %r13
+        jg proximo_bloco
+
+        movq $ocupado, %rdi
+        call printf
+
+        addq $1, %r13
+
+        jmp bloco_ocupado
+
+    bloco_disponivel:
+        cmpq %r12, %r13
+        jg proximo_bloco
+        
+        movq $livre, %rdi
+        call printf
+
+        addq $1, %r13
+
+        jmp bloco_disponivel
+
+    proximo_bloco:
+        addq $8, %rbx     # tamanho do espaço de informacoes
+        addq %r12, %rbx   # tamanho do bloco
+
+        jmp laco
+    
+    retorno:
+        movq $brline, %rdi
+        call printf
+        popq %rbp
+        ret
+
+# main:
+#     pushq %rbp
+#     movq %rsp, %rbp
+#     call iniciaAlocador
+#     subq $8, %rsp
+#     movq $100, %rdi
+#     pushq %rdi
+#     call alocaMem
+#     popq %rdi
+#     movq %rax, %rbx
+#     movq $20, %rdi
+#     pushq %rdi
+#     call alocaMem
+#     popq %rdi
+#     movq %rbx, %rdi
+#     call liberaMem
+#     addq $8, %rsp
+#     call imprimeMapa
+#     movq $60, %rax
+#     syscall
     

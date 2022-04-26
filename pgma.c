@@ -4,17 +4,19 @@
 int main() {
   void *a, *b;
   iniciaAlocador();
-  //imprimeMapa();
-  a=alocaMem(240);
-  a = "rossiya";
-  printf("%s\n", (char *)a);
-  //imprimeMapa();
-  b=alocaMem(50);
-  //imprimeMapa();
-  //liberaMem(a);
-  //imprimeMapa();
-  //a=alocaMem(50);
-  //imprimeMapa();
+  imprimeMapa();
+  a=alocaMem(20);
+  imprimeMapa();
+  liberaMem(a);
+  imprimeMapa();
+  b=alocaMem(10);
+  imprimeMapa();
+  a=alocaMem(50);
+  imprimeMapa();
+  liberaMem(b);
+  imprimeMapa();
+  a=alocaMem(21);
+  imprimeMapa();
 
   finalizaAlocador();
 
