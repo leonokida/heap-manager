@@ -26,9 +26,9 @@ iniciaAlocador:
     syscall
     movq %rax, topoInicialHeap
     movq %rax, topoAtualHeap
-    movq $strInicia, %rdi # primeiro argumento printf (string)
-    movq %rax, %rsi # segundo argumento printf (endereço a ser impresso)
-    call printf
+    # movq $strInicia, %rdi # primeiro argumento printf (string)
+    # movq %rax, %rsi # segundo argumento printf (endereço a ser impresso)
+    # call printf
     popq %rbp
     ret
 
@@ -109,10 +109,12 @@ imprimeMapa:
     movq %rsp, %rbp
 
     movq topoInicialHeap, %rbx
-    movq topoAtualHeap, %r10
+
+    pushq %r12
+    pushq %r13
 
     laco:
-        cmpq %r10, %rbx
+        cmpq topoAtualHeap, %rbx
         jge retorno
         jl imprime
 
@@ -160,6 +162,8 @@ imprimeMapa:
     retorno:
         movq $brline, %rdi
         call printf
+        popq %r13
+        popq %r12
         popq %rbp
         ret
 
