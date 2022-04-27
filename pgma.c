@@ -7,17 +7,24 @@ int main() {
   imprimeMapa();
   a=alocaMem(20);
   imprimeMapa();
+  b = alocaMem(20);
+  imprimeMapa();
   liberaMem(a);
-  imprimeMapa();
-  b=alocaMem(10);
-  imprimeMapa();
-  a=alocaMem(50);
   imprimeMapa();
   liberaMem(b);
   imprimeMapa();
-  a=alocaMem(21);
+  a = alocaMem(20);
   imprimeMapa();
-
+  b = alocaMem(40);
+  imprimeMapa();
+  liberaMem(a);
+  imprimeMapa();
+  liberaMem(b);
+  imprimeMapa();
+  a = alocaMem(2);
+  imprimeMapa();
+  liberaMem(a);
+  imprimeMapa();
   finalizaAlocador();
 
 }

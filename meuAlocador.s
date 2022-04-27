@@ -6,6 +6,7 @@
     brline: .string "\n"
     topoInicialHeap: .quad 0
     topoAtualHeap: .quad 0
+    ultimoAlocado: .quad 0
     .equ OCUPADO, 0
     .equ LIVRE, 1
 
@@ -26,6 +27,7 @@ iniciaAlocador:
     syscall
     movq %rax, topoInicialHeap
     movq %rax, topoAtualHeap
+    movq $0, ultimoAlocado
     # movq $strInicia, %rdi # primeiro argumento printf (string)
     # movq %rax, %rsi # segundo argumento printf (endereço a ser impresso)
     # call printf
@@ -45,13 +47,20 @@ finalizaAlocador:
 alocaMem:
     pushq %rbp
     movq %rsp, %rbp
-
-    movq topoInicialHeap, %r10 # itera começando pelo início
-    movq topoAtualHeap, %r11 # r11 guarda final da heap
     pushq %r12
 
+    movq ultimoAlocado, %r10
+    cmpq $0, %r10
+    je aumentaHeap
+
+    cmpq $LIVRE, (%r10)
+    je armazena
+
+    movq topoInicialHeap, %r10 # itera começando pelo início
+    movq ultimoAlocado, %r11 # r11 guarda último alocado
+
     iteracao:
-        cmpq %r10, %r11 # compara iterador com topo
+        cmpq %r10, %r11 # compara iterador com último alocado (já verificado)
         je aumentaHeap # se igual, aumenta heap
         
         movq 8(%r10), %r12
@@ -75,6 +84,8 @@ alocaMem:
         ret
 
     aumentaHeap:
+        movq topoAtualHeap, %r11
+        movq topoAtualHeap, %r10
         addq $8, %r11
         addq %rdi, %r11
         movq %r11, topoAtualHeap
@@ -85,6 +96,7 @@ alocaMem:
         movq $12, %rax
         syscall
 
+        movq %r10, ultimoAlocado
         movq $OCUPADO, (%r10) # indica que bloco está ocupado
         movq %r13, 8(%r10) # armazena tamanho do bloco
         movq %r10, %rax
