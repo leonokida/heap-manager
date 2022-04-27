@@ -7,6 +7,7 @@
     topoInicialHeap: .quad 0
     topoAtualHeap: .quad 0
     ultimoAlocado: .quad 0
+    ultimoLiberado: .quad 0
     .equ OCUPADO, 0
     .equ LIVRE, 1
 
@@ -28,6 +29,7 @@ iniciaAlocador:
     movq %rax, topoInicialHeap
     movq %rax, topoAtualHeap
     movq $0, ultimoAlocado
+    movq $0, ultimoLiberado
     # movq $strInicia, %rdi # primeiro argumento printf (string)
     # movq %rax, %rsi # segundo argumento printf (endereço a ser impresso)
     # call printf
@@ -108,13 +110,62 @@ alocaMem:
     popq %rbp
     ret
 
+merge: # começa pelo espaço de controle de disponibilidade do bloco
+    pushq %rbp
+    movq %rsp, %rbp
+
+    movq 8(%rsi), %r10
+    movq 8(%rdi), %r11
+    addq %r10, %r11
+    addq $16, %r11
+    movq %r11, 8(%rdi)
+
+    cmpq ultimoAlocado, %rsi
+    jne fimMerge
+    movq %rdi, ultimoAlocado
+
+    fimMerge:
+        popq %rbp
+        ret
+
 liberaMem:
     pushq %rbp
     movq %rsp, %rbp
+
+    movq $LIVRE, -16(%rdi)
+
+    movq %rdi, %r10
+    subq $8, %r10
+    addq (%r10), %r10 # r10 <- próximo bloco
+    cmpq $LIVRE, (%r10)
+    jne pula
+    pushq %rdi
     subq $16, %rdi
-    movq $LIVRE, (%rdi)
-    popq %rbp
-    ret
+    movq %r10, %rsi
+    call merge
+    popq %rdi
+
+    pula:
+        movq ultimoLiberado, %r10
+        cmpq $OCUPADO, %r10
+        je fim
+        addq $8, %r10
+        addq (%r10), %r10
+        movq %rdi, %r11
+        subq $16, %r11
+        cmpq %r11, %r10
+        jne fim
+        pushq %rdi
+        movq %r11, %rsi
+        movq ultimoLiberado, %rdi
+        call merge
+        popq %rdi
+
+    fim:
+        subq $16, %rdi
+        movq %rdi, ultimoLiberado
+        popq %rbp
+        ret
 
 imprimeMapa:
     pushq %rbp
