@@ -1,22 +1,18 @@
 #include "meuAlocador.h" 
-#include <stdio.h>
 
 int main() {
   void *a, *b;
   iniciaAlocador();
   imprimeMapa();
-  a=alocaMem(50);
+  a=alocaMem(240);
   imprimeMapa();
-  b = alocaMem(20);
+  b=alocaMem(50);
   imprimeMapa();
   liberaMem(a);
   imprimeMapa();
-  liberaMem(b);
+  a=alocaMem(50);
   imprimeMapa();
-  a = alocaMem(50);
-  imprimeMapa();
-  b = alocaMem(16);
-  imprimeMapa();
+
   finalizaAlocador();
 
 }

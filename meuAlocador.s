@@ -59,6 +59,7 @@ alocaMem:
     je armazena
 
     movq topoInicialHeap, %r10 # itera começando pelo início
+    addq $8, %r10
     movq ultimoAlocado, %r11 # r11 guarda último alocado
 
     iteracao:
@@ -73,7 +74,7 @@ alocaMem:
         jle armazena # armazena no bloco se o tamanho é menor ou igual
 
     incrementaIterador:
-        addq $8, %r10
+        addq $16, %r10
         addq %r12, %r10
         jmp iteracao
 
@@ -88,7 +89,8 @@ alocaMem:
     aumentaHeap:
         movq topoAtualHeap, %r11
         movq topoAtualHeap, %r10
-        addq $8, %r11
+        addq $8, %r10
+        addq $16, %r11
         addq %rdi, %r11
         movq %r11, topoAtualHeap
         pushq %r13
@@ -132,11 +134,16 @@ liberaMem:
     pushq %rbp
     movq %rsp, %rbp
 
+    cmpq $LIVRE, -16(%rdi)
+    je retornoLibera
+
     movq $LIVRE, -16(%rdi)
 
     movq %rdi, %r10
-    subq $8, %r10
-    addq (%r10), %r10 # r10 <- próximo bloco
+    addq -8(%r10), %r10 # r10 <- próximo bloco
+    addq $8, %r10
+    cmpq %r10, topoAtualHeap
+    je pula
     cmpq $LIVRE, (%r10)
     jne pula
     pushq %rdi
@@ -147,10 +154,12 @@ liberaMem:
 
     pula:
         movq ultimoLiberado, %r10
-        cmpq $OCUPADO, %r10
+        cmpq $0, %r10
         je fim
-        addq $8, %r10
-        addq (%r10), %r10
+        cmpq $OCUPADO, (%r10)
+        je fim
+        addq 8(%r10), %r10
+        addq $16, %r10
         movq %rdi, %r11
         subq $16, %r11
         cmpq %r11, %r10
@@ -160,10 +169,11 @@ liberaMem:
         movq ultimoLiberado, %rdi
         call merge
         popq %rdi
-
+        jmp retornoLibera
     fim:
         subq $16, %rdi
         movq %rdi, ultimoLiberado
+    retornoLibera:
         popq %rbp
         ret
 
@@ -172,6 +182,7 @@ imprimeMapa:
     movq %rsp, %rbp
 
     movq topoInicialHeap, %rbx
+    addq $8, %rbx
 
     pushq %r12
     pushq %r13
@@ -217,7 +228,7 @@ imprimeMapa:
         jmp bloco_disponivel
 
     proximo_bloco:
-        addq $8, %rbx     # tamanho do espaço de informacoes
+        addq $16, %rbx     # tamanho do espaço de informacoes
         addq %r12, %rbx   # tamanho do bloco
 
         jmp laco
