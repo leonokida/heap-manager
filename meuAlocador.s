@@ -141,7 +141,6 @@ liberaMem:
 
     movq %rdi, %r10
     addq -8(%r10), %r10 # r10 <- próximo bloco
-    addq $8, %r10
     cmpq %r10, topoAtualHeap
     je pula
     cmpq $LIVRE, (%r10)
