@@ -112,19 +112,19 @@ alocaMem:
     popq %rbp
     ret
 
-merge: # começa pelo espaço de controle de disponibilidade do bloco
+merge: # começa pelo espaço de controle de disponibilidade dos blocos
     pushq %rbp
     movq %rsp, %rbp
 
-    movq 8(%rsi), %r10
-    movq 8(%rdi), %r11
-    addq %r10, %r11
-    addq $16, %r11
-    movq %r11, 8(%rdi)
+    movq 8(%rsi), %r10 # segundo bloco
+    movq 8(%rdi), %r11 # primeiro bloco
+    addq %r10, %r11 # soma tamanhos
+    addq $16, %r11 # soma 16
+    movq %r11, 8(%rdi) # guarda no controle de tamanho do primeiro bloco
 
-    cmpq ultimoAlocado, %rsi
+    cmpq ultimoAlocado, %rsi # se o segundo é o ultimoAlocado
     jne fimMerge
-    movq %rdi, ultimoAlocado
+    movq %rdi, ultimoAlocado # coloca o primeiro em ultimoAlocado
 
     fimMerge:
         popq %rbp
@@ -134,44 +134,44 @@ liberaMem:
     pushq %rbp
     movq %rsp, %rbp
 
-    cmpq $LIVRE, -16(%rdi)
+    cmpq $LIVRE, -16(%rdi) # testa double free
     je retornoLibera
 
-    movq $LIVRE, -16(%rdi)
+    movq $LIVRE, -16(%rdi) # sinaliza como livre
 
     movq %rdi, %r10
     addq -8(%r10), %r10 # r10 <- próximo bloco
-    cmpq %r10, topoAtualHeap
-    je pula
-    cmpq $LIVRE, (%r10)
+    cmpq %r10, topoAtualHeap # testa se o próximo bloco existe (não passa do topo)
+    jge pula
+    cmpq $LIVRE, (%r10) # se o próximo estiver ocupado, não faz nada
     jne pula
     pushq %rdi
     subq $16, %rdi
     movq %r10, %rsi
-    call merge
+    call merge # chama merge com o primeiro bloco sendo o atual e o segundo sendo o próximo
     popq %rdi
 
     pula:
         movq ultimoLiberado, %r10
-        cmpq $0, %r10
+        cmpq $0, %r10 # testa se existe ultimoLiberado
         je fim
-        cmpq $OCUPADO, (%r10)
+        cmpq $OCUPADO, (%r10) # testa se ultimoLiberado já está ocupado
         je fim
         addq 8(%r10), %r10
-        addq $16, %r10
+        addq $16, %r10 # r10 <- bloco seguinte ao ultimoLiberado
         movq %rdi, %r11
         subq $16, %r11
-        cmpq %r11, %r10
+        cmpq %r11, %r10 # testa se o bloco atual é o próximo ao ultimoLiberado
         jne fim
         pushq %rdi
         movq %r11, %rsi
         movq ultimoLiberado, %rdi
-        call merge
+        call merge # chama merge com o primeiro bloco sendo o ultimoLiberado e o segundo o atual
         popq %rdi
         jmp retornoLibera
     fim:
         subq $16, %rdi
-        movq %rdi, ultimoLiberado
+        movq %rdi, ultimoLiberado # atualiza ultimoLiberado com o bloco atual
     retornoLibera:
         popq %rbp
         ret
